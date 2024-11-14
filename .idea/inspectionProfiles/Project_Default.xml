@@ -1,0 +1,32 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="10">
+            <item index="0" class="java.lang.String" itemvalue="uc-rest" />
+            <item index="1" class="java.lang.String" itemvalue="phonenumbers" />
+            <item index="2" class="java.lang.String" itemvalue="pytest" />
+            <item index="3" class="java.lang.String" itemvalue="deepmerge" />
+            <item index="4" class="java.lang.String" itemvalue="pytest-asyncio" />
+            <item index="5" class="java.lang.String" itemvalue="uc-flow-nodes" />
+            <item index="6" class="java.lang.String" itemvalue="pytest-flake8" />
+            <item index="7" class="java.lang.String" itemvalue="pytest-cov" />
+            <item index="8" class="java.lang.String" itemvalue="asynctest" />
+            <item index="9" class="java.lang.String" itemvalue="flake8" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="nodes.*" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="TsLint" enabled="true" level="WARNING" enabled_by_default="true" />
+  </profile>
+</component>

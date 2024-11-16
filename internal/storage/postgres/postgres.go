@@ -29,18 +29,15 @@ func New(db_config config.Db) (*Storage, error) {
 
 func (s *Storage) SaveURL(url string, alias string) (int64, error) {
 	const op = "storage.postgres.SaveURL"
-	stmt, err := s.db.Prepare(`INSERT INTO url(url, alias) VALUES (?, ?)`)
+	stmt, err := s.db.Prepare(`INSERT INTO url(url, alias) VALUES ($1, $2) RETURNING id`)
 	if err != nil {
 		return 0, fmt.Errorf("%s: prepare statement: %w", op, err)
 	}
-	res, err := stmt.Exec(url, alias)
-	if err != nil {
-		fmt.Errorf("%s: execute statement: %w", op, err)
-	}
 
-	id, err := res.LastInsertId()
+	var id int64
+	err = stmt.QueryRow(url, alias).Scan(&id)
 	if err != nil {
-		return 0, fmt.Errorf("%s: get last insert ID: %w", op, err)
+		return 0, fmt.Errorf("%s: execute statement: %w", op, err)
 	}
 
 	return id, nil
@@ -49,7 +46,7 @@ func (s *Storage) SaveURL(url string, alias string) (int64, error) {
 func (s *Storage) GetURL(alias string) (string, error) {
 	const op = "storage.postgres.GetURL"
 
-	query, err := s.db.Prepare("SELECT * FROM url WHERE alias = ?")
+	query, err := s.db.Prepare("SELECT url FROM url WHERE alias = $1")
 	if err != nil {
 		return "", fmt.Errorf("%s: prepare statement: %w", op, err)
 	}

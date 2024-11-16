@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/iosifbrudnyi/url-shortner/internal/config"
@@ -10,7 +11,11 @@ import (
 	"github.com/iosifbrudnyi/url-shortner/internal/lib/logger/sl"
 	"github.com/iosifbrudnyi/url-shortner/internal/storage/postgres"
 	"log/slog"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 const (
@@ -40,6 +45,40 @@ func main() {
 
 	router.Post("/", save.New(log, storage))
 	router.Get("/{alias}", redirect.New(log, storage))
+
+	log.Info("starting server", slog.String("address", cfg.HttpServer.Address))
+
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	srv := &http.Server{
+		Addr:         cfg.HttpServer.Address,
+		Handler:      router,
+		ReadTimeout:  cfg.HttpServer.Timeout,
+		WriteTimeout: cfg.HttpServer.Timeout,
+		IdleTimeout:  cfg.HttpServer.IdleTimeout,
+	}
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Error("failed to start http server", sl.Err(err))
+		}
+	}()
+
+	log.Info("server started")
+
+	<-done
+
+	log.Info("stopping server")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Error("failed to shutdown http server", sl.Err(err))
+		return
+	}
+
+	log.Info("server stopped")
 }
 
 func setupLogger(env string) *slog.Logger {
